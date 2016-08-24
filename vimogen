@@ -15,7 +15,7 @@ MSG=''
 
 usage() {
     printf "Usage:\n"
-    printf "vimogen [-v|heap|update]\n\n" 
+    printf "vimogen [-v|heap|update]\n\n"
     exit
 }
 
@@ -27,9 +27,9 @@ generate_manifest() {
     pushd . > /dev/null
 
     cd "$install_dir"
-    for i in $(ls); do 
+    for i in $(ls); do
         pushd . > /dev/null
-        cd "$i" 
+        cd "$i"
         local url=$(git remote -v | perl -ne 'print $1 if /^origin\s(.*)\s\(fetch\)/')
         echo "$url" >> "$manifest_file"
         popd > /dev/null
@@ -49,7 +49,7 @@ validate_environment() {
         generate_manifest
         pause
     fi
-    
+
     if [[ ! -f "$manifest_file" ]]; then
         printf "[failed].\nPlease create %s.\n" "$manifest_file"
         exit 0
@@ -105,7 +105,7 @@ uninstall() {
     while :
     do
         local plugins=()
-        for clone_dir in $(ls); do 
+        for clone_dir in $(ls); do
             if [[ -d "$install_dir/$clone_dir" ]]; then
                 plugins+=( "$clone_dir" )
             fi
@@ -125,7 +125,7 @@ uninstall() {
         do
             MSG=''
             case "$option" in
-                BACK) 
+                BACK)
                     if [[ "$option" -eq "BACK" ]]; then
                         return 0
                     fi
@@ -167,29 +167,30 @@ update() {
     cd "$install_dir"
     local updated=0
 
-    for i in $(ls); do 
-        pushd . > /dev/null
-        cd "$i" 
+    for i in $(ls); do
+      pushd . > /dev/null
+      if [ -d $i ]; then
+        cd "$i"
         if [[ $arg1 = "-v" ]]; then
-            local pull=$(git pull --verbose)
+          local pull=$(git pull --verbose)
         else
-            local pull=$(git pull --verbose 2>&1 | awk 'NR==2;END{print}')
+          local pull=$(git pull --verbose 2>&1 | awk 'NR==2;END{print}')
         fi
 
         if [[ $pull != *"Already up-to-date"* ]]; then
-            updated=1
-            printf "%s\n\n" "$pull"
+          updated=1
+          printf "%s\n\n" "$pull"
         fi
 
         if [[ $pull = *vimogen* && $pull != *"Already up-to-date"* ]]; then
-            MSG+="\nVimogen was updated! You should cp $install_dir/vimogen/vimogen to your \$PATH"
+          MSG+="\nVimogen was updated! You should cp $install_dir/vimogen/vimogen to your \$PATH"
         fi
 
         if [[ $pull = *pathogen* && $pull != *"Already up-to-date"* ]]; then
-            MSG+="\nPathogen was updated. You should cp $install_dir/vim-pathogen/bundle/pathogen.vim ~/.vim/autoload/"
+          MSG+="\nPathogen was updated. You should cp $install_dir/vim-pathogen/bundle/pathogen.vim ~/.vim/autoload/"
         fi
-
-        popd > /dev/null
+      fi
+      popd > /dev/null
     done
 
     if (( $updated == 0 )); then
@@ -220,23 +221,23 @@ get_menu_opt() {
         do
             MSG=''
             case "$option" in
-                INSTALL) 
+                INSTALL)
                     install
                     break
                     ;;
-                UNINSTALL) 
+                UNINSTALL)
                     uninstall
                     break
                     ;;
-                UPDATE) 
+                UPDATE)
                     update
                     break
                     ;;
-                EXIT) 
+                EXIT)
                     exit 0
                     break
                     ;;
-                *) 
+                *)
                     MSG="Invalid selection"
                     break
                     ;;
